@@ -1,0 +1,3 @@
+[run]
+source = ../src/glados
+omit = ../src/glados/__main__.py
