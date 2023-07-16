@@ -1,3 +1,4 @@
+![version](https://img.shields.io/badge/version-1.2.3-blue)
 [![build](https://github.com/drjrm3/glados/actions/workflows/build.yml/badge.svg)](https://github.com/drjrm3/glados/actions/workflows/build.yml)
 
 # GLADOS

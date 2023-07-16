@@ -7,6 +7,9 @@ export PATH=$HERE/../bin:$PATH
 
 glados turret -v
 
+#turret -p 3123
+#exit $?
+
 #turret 
 #exit $?
 
@@ -17,6 +20,8 @@ MIN_PYLINT_SCORE=9.0
 pylint --rcfile=../.pylintrc ../src/glados > pylint.tmp
 cat pylint.tmp | tail -n2
 cat pylint.tmp
+
+#exit $?
 
 echo "[**********************]"
 echo "[* Running Unit Tests *]"
