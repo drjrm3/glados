@@ -12,7 +12,7 @@ from .core import turretServer
 
 #-------------------------------------------------------------------------------
 def main():
-    """ Main routine. """
+    """Main routine."""
     action = sys.argv[1]
     args = getArgs()
 

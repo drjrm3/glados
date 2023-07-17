@@ -12,10 +12,10 @@ from .Turret import TurretGauge
 
 #-------------------------------------------------------------------------------
 class StorageUsageTurret(Turret):
-    """ Storage Usage statistics. """
+    """Storage Usage statistics."""
     #---------------------------------------------------------------------------
     def __init__(self):
-        """ Initialization. """
+        """Initialization."""
         super().__init__()
         self.__dfInfo = ""
         self.__excludeList = ["tmpfs"]
@@ -23,20 +23,20 @@ class StorageUsageTurret(Turret):
 
     #---------------------------------------------------------------------------
     def _readDfInfo(self):
-        """ Read df. """
+        """Read df."""
         outStr, _errStr, returnCode = runCommand("df")
         assert returnCode == 0
         self.__dfInfo = outStr
 
     #---------------------------------------------------------------------------
     def acquire(self):
-        """ Acquire storage stats and call collector. """
+        """Acquire storage stats and call collector."""
         self._readDfInfo()
 
         self.gauges = {
             "mnt_used_pct": TurretGauge("mnt_used_pct", "Mount usage pct.", "mnt"),
             "mnt_avail": TurretGauge("mnt_avail", "Mount available in GB.", "mnt")
-            }
+        }
         for name in self.gauges:
             self.metrics[name] = []
 
@@ -51,5 +51,5 @@ class StorageUsageTurret(Turret):
             usePct = float(usePctStr.replace("%", ""))
             self.metrics["mnt_used_pct"].append((mnt, usePct))
 
-            availGB = float(availStr) / (1024. * 1024.)
+            availGB = float(availStr) / (1024.0 * 1024.0)
             self.metrics["mnt_avail"].append((mnt, availGB))

@@ -21,6 +21,16 @@ pylint --rcfile=../.pylintrc ../src/glados > pylint.tmp
 cat pylint.tmp | tail -n2
 cat pylint.tmp
 
+#echo "[*****************]"
+#echo "[* Running black *]"
+#echo "[*****************]"
+#black --diff ../src/glados > black.diff
+
+echo "[****************]"
+echo "[* Running mypy *]"
+echo "[****************]"
+mypy ../src/glados
+
 #exit $?
 
 echo "[**********************]"
