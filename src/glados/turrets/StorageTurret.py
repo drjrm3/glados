@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Storage Stats Turret.
+Example of using 'acquire' and allowing Turret to invoke 'collect'.
 
 Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """
 
-from prometheus_client.core import GaugeMetricFamily as GMF
-
 from ..utils import runCommand
 from .Turret import Turret
+from .Turret import TurretGauge
 
 #-------------------------------------------------------------------------------
 class StorageUsageTurret(Turret):
@@ -29,11 +29,17 @@ class StorageUsageTurret(Turret):
         self.__dfInfo = outStr
 
     #---------------------------------------------------------------------------
-    def collect(self):
-        """ Run the collector. """
+    def acquire(self):
+        """ Acquire storage stats and call collector. """
         self._readDfInfo()
-        mntUsePct = GMF("mnt_used_pct", "Mount usage pct.", labels=["mnt"])
-        mntAvailGB = GMF("mnt_avail", "Mount available in GB.", labels=["mnt"])
+
+        self.gauges = {
+            "mnt_used_pct": TurretGauge("mnt_used_pct", "Mount usage pct.", "mnt"),
+            "mnt_avail": TurretGauge("mnt_avail", "Mount available in GB.", "mnt")
+            }
+        for name in self.gauges:
+            self.metrics[name] = []
+
         mnt = ""
         usePct = 0.0
         for line in self.__dfInfo.splitlines()[1:]:
@@ -43,9 +49,7 @@ class StorageUsageTurret(Turret):
 
             _fs, _sizeStr, _useStr, availStr, usePctStr, mnt = words
             usePct = float(usePctStr.replace("%", ""))
-            mntUsePct.add_metric([f"{mnt}"], usePct)
-            availGB = float(availStr) / (1024. * 1024.)
-            mntAvailGB.add_metric([f"{mnt}"], availGB)
+            self.metrics["mnt_used_pct"].append((mnt, usePct))
 
-        yield mntUsePct
-        yield mntAvailGB
+            availGB = float(availStr) / (1024. * 1024.)
+            self.metrics["mnt_avail"].append((mnt, availGB))

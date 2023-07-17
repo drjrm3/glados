@@ -2,6 +2,7 @@
 """ Test basic utilities for glados. """
 
 import unittest as ut
+from collections.abc import Generator
 
 from glados.turrets.Turret import Turret
 
@@ -11,26 +12,20 @@ class TestTurret(ut.TestCase):
     #---------------------------------------------------------------------------
     def testCreation(self):
         """ Create the basic Turret class for now. """
-        turret = Turret
+        _ = Turret
 
     #---------------------------------------------------------------------------
-    def testAcquireHmmm(self):
-        """
-        One of 'acquire' or 'collect' must raise NotImplementedError which is to
-        be used by the inheriting Turret to create metrics.
-        The other should be doing the actual collection here.
-        Not sure which one should be which yet.
-        """
+    def testAcquireNotImplementedError(self):
+        """ Test NotImplementedError in acquire(). """
+
         with self.assertRaises(NotImplementedError):
             Turret().acquire()
 
     #---------------------------------------------------------------------------
-    def testCollectHmmm(self):
-        """
-        One of 'acquire' or 'collect' must raise NotImplementedError which is to
-        be used by the inheriting Turret to create metrics.
-        The other should be doing the actual collection here.
-        Not sure which one should be which yet.
-        """
+    def testCollectNotImplementedError(self):
+        """ Test NotImplementedError upon caling next() on collect() """
+        # Generator. No raising of NotImplementedError until called.
+        collector = Turret().collect()
+        self.assertIsInstance(collector, Generator)
         with self.assertRaises(NotImplementedError):
-            Turret().collect()
+            yield collector

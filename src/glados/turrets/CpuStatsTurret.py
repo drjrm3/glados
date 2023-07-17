@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 CPU Stats collector.
+Example of not using 'acquire' and doing everything through 'collect' natively.
 
 Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """

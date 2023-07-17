@@ -29,4 +29,6 @@ def updateVersion():
 
 updateVersion()
 
+# pylint: disable=wrong-import-position
 from .version import __version__
+# pylint: enable=wrong-import-position
