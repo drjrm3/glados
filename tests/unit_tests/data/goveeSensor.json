@@ -1,0 +1,14 @@
+{
+    "date": "2023-07-18 02:11:00 UTC",
+    "name": "govee_sensors",
+    "description": "Govee metrics per location.",
+    "labels": ["location", "metric"],
+    "metrics": [
+        [["room123", "humidity"], 44.2],
+        [["room123", "temp"], 24.0],
+        [["room345", "humidity"], 45.3],
+        [["room345", "temp"], 25.9],
+        [["room678", "humidity"], 47.0],
+        [["room678", "temp"], 31.6]
+    ]
+}

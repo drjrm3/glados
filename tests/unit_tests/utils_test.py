@@ -1,9 +1,35 @@
 #!/usr/bin/env python3
 """ Test basic utilities for glados. """
 
+import glob
+import os.path as op
 import unittest as ut
 
 from glados import utils
+
+#-------------------------------------------------------------------------------
+class TestGetParamsFromConfig(ut.TestCase):
+    """ Test invocations of TestGetParamsFromConfig function. """
+    #---------------------------------------------------------------------------
+    def setUp(self):
+        self.testDataDir = op.join(op.dirname(op.realpath(__file__)), "data")
+
+    #---------------------------------------------------------------------------
+    def testNoConfig(self):
+        """Test default options from no file input."""
+        gsParams = { "sleepTime": 5, "FileTurrets": [], "JsonTurrets": [] }
+        params = utils.getParamsFromConfig()
+        self.assertDictEqual(params, gsParams)
+
+    #---------------------------------------------------------------------------
+    def testConfig1(self):
+        """Test that config1.json matches up."""
+        gsParams = {"sleepTime": 5, "FileTurrets": [],
+                    "JsonTurrets": ["./unit_tests/data/goveeSensor.json"]}
+        config = op.join(self.testDataDir, "config1.json")
+        print(type(config), config)
+        params = utils.getParamsFromConfig(config)
+        self.assertDictEqual(params, gsParams)
 
 #-------------------------------------------------------------------------------
 class TestRunCommand(ut.TestCase):

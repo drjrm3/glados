@@ -5,33 +5,56 @@ CPU Stats Turret.
 Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """
 
-from typing import List, Tuple
+import os.path as op
+from typing import Dict, Optional, List, Tuple
 
 from prometheus_client.registry import Collector
 from prometheus_client.core import GaugeMetricFamily
+
+from . import hostname as hostnameActual
 
 #-------------------------------------------------------------------------------
 class TurretGauge(GaugeMetricFamily):
     """Basic Gauge."""
     #---------------------------------------------------------------------------
-    def __init__(self, name="", documentation="", label=""):
+    # TODO: Add timestamp.
+    def __init__(self, name="", documentation="", labels: Optional[List]=None):
         """Initialization."""
-        super().__init__(name, documentation, labels=[label])
-
-    #---------------------------------------------------------------------------
-    def createCollector(self, gaugeMetrics: List[Tuple[str, float]]):
-        """Create a collector from the acquire step."""
-        for key, value in gaugeMetrics:
-            self.add_metric([key], value)
+        if not isinstance(labels, List):
+            labels = [""]
+        super().__init__(name, documentation, labels=labels)
 
 #-------------------------------------------------------------------------------
 class Turret(Collector):
     """Basic turret."""
     #---------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, file: str="", hostname: str=""):
         """Initialization."""
-        self.gauges = {}  # str -> TurretGauge
-        self.metrics = {} # str -> List[Tuple[str, float]]
+        self.gauge: GaugeMetricFamily
+        self.metrics: Dict[str, List[Tuple[List[str], float]]] = {}
+        self.hostname = hostname if hostname else hostnameActual
+
+        self._fileName=file
+        self._turretFileInfo=""
+
+        if self._fileName and not op.exists(self._fileName):
+            raise FileNotFoundError(self._turretFileInfo)
+
+    #---------------------------------------------------------------------------
+    def _readFileInfo(self):
+        """If the Turret was given a file to read then process the file."""
+        with open(self._fileName, "r", encoding="UTF-8") as finp:
+            self._turretFileInfo = finp.read()
+
+    #---------------------------------------------------------------------------
+    def addMetric(self, labels: List[str], value: float) -> None:
+        """Add a metric to the gauge
+
+        Args:
+            labels: A list of label values.
+            value: The float value to add.
+        """
+        self.gauge.add_metric(labels, value)
 
     #---------------------------------------------------------------------------
     def acquire(self):
@@ -44,11 +67,9 @@ class Turret(Collector):
         """Basic Collector.collect method. Calls acquire to get gauges and
         metrics, then creates and yields each gauge.
         """
+        if self._fileName:
+            self._readFileInfo()
+
         self.acquire()
 
-        for name, gauge in self.gauges.items():
-            gaugeMetrics = self.metrics[name]
-            gauge.createCollector(gaugeMetrics)
-
-        for name, gauge in self.gauges.items():
-            yield gauge
+        yield self.gauge

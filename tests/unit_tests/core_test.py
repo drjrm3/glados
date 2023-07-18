@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """ Test basic utilities for glados. """
 
+import glob
+import os.path as op
 import socket
 import unittest as ut
 import timeout_decorator
 from timeout_decorator.timeout_decorator import TimeoutError
 
-from glados.core import turretServer
+from glados.core import turretServer, getFileTurrets, getJsonTurrets
 
 #-------------------------------------------------------------------------------
 def getOpenPort() -> int:
@@ -19,8 +21,47 @@ def getOpenPort() -> int:
     return sock.getsockname()[1]
 
 #-------------------------------------------------------------------------------
+class TestGetFileTurrets(ut.TestCase):
+    """Test invocation of getFileTurrets function."""
+    #---------------------------------------------------------------------------
+    def setUp(self):
+        self.testDataDir = op.join(op.dirname(op.realpath(__file__)), "data")
+
+    #---------------------------------------------------------------------------
+    def testGetFileTurrets(self):
+        """Test finding correct file turrets."""
+        turretFiles = glob.glob(self.testDataDir + "/randomServer/*")
+        turrets = getFileTurrets(turretFiles)
+        fxns = ["acquire", "addMetric", "_readFileInfo", "collect"]
+        for turret in turrets:
+            dirTurret = dir(turret)
+            self.assertTrue(all([f in dirTurret for f in fxns]))
+
+#-------------------------------------------------------------------------------
+class TestGetJsonTurrets(ut.TestCase):
+    """Test invocation of getJsonTurrets function."""
+    #---------------------------------------------------------------------------
+    def setUp(self):
+        self.testDataDir = op.join(op.dirname(op.realpath(__file__)), "data")
+        self.testFile = op.join(self.testDataDir, "goveeSensor.json")
+
+    #---------------------------------------------------------------------------
+    def testGetJsonTurret(self):
+        """Test finding correct file turrets."""
+        turretJsons = [self.testFile]
+        turrets = getJsonTurrets(turretJsons)
+        fxns = ["acquire", "addMetric", "_readFileInfo", "collect"]
+        for turret in turrets:
+            dirTurret = dir(turret)
+            self.assertTrue(all([f in dirTurret for f in fxns]))
+
+#-------------------------------------------------------------------------------
 class TestTurretServer(ut.TestCase):
     """ Test invocations of turretServer. """
+    #---------------------------------------------------------------------------
+    def setUp(self):
+        self.testDataDir = op.join(op.dirname(op.realpath(__file__)), "data")
+
     #---------------------------------------------------------------------------
     def testWrongPortType(self):
         """ Assert that the call fails without an integer (port) input. """
@@ -29,10 +70,11 @@ class TestTurretServer(ut.TestCase):
 
     #---------------------------------------------------------------------------
     @timeout_decorator.timeout(0.25)
-    def testHangingSuccess(self):
+    def testHangingSuccessNoConfigs(self):
         """ Assert turretServer works by asserting a timeout error. """
         with self.assertRaises(TimeoutError):
-            turretServer(2024)
+            configFile = op.join(self.testDataDir, "config3.json")
+            turretServer(2024, configFile=configFile)
 
     #---------------------------------------------------------------------------
     @timeout_decorator.timeout(1)
