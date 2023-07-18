@@ -9,7 +9,7 @@ from subprocess import run, PIPE
 
 #-------------------------------------------------------------------------------
 def updateVersion():
-    """ Return the version of this repository based on the git tag. """
+    """Return the version of this repository based on the git tag."""
 
     versionFile = os.path.join(os.path.dirname(__file__), "version.py")
 
@@ -18,14 +18,13 @@ def updateVersion():
     proc = run(cmd, stdout=PIPE, stderr=PIPE, check=False)
     if proc.returncode == 0:
         gitVersion = proc.stdout.decode("utf-8").rstrip().split("-")
-        _version = gitVersion[0].lstrip('v')
+        _version = gitVersion[0].lstrip("v")
         if len(gitVersion) > 1:
             _version += f"+{gitVersion[1]}"
         if len(gitVersion) > 2:
             _version += f".{gitVersion[2]}"
         with open(versionFile, "w", encoding="UTF-8") as fout:
-            print('""" Version. """', file=fout)
-            print(f"__version__ = '{_version}'", file=fout)
+            print(f'"""Version."""\n__version__ = "{_version}"', file=fout)
 
 updateVersion()
 

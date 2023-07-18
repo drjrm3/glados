@@ -16,7 +16,7 @@ from . import __version__
 
 #-------------------------------------------------------------------------------
 def getArgs(argv=None):
-    """ Get arguments. """
+    """Get arguments."""
     if not argv:
         argv = sys.argv
 
@@ -55,7 +55,7 @@ def getArgs(argv=None):
 
 #-------------------------------------------------------------------------------
 def runCommand(cmdStr: str, shell=False, stdout=None, stderr=None) -> Tuple[str, str, int]:
-    """ Run a shell command from Python.
+    """Run a shell command from Python.
 
     Args:
         cmdStr: Command to run.

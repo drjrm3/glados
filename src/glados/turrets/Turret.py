@@ -12,37 +12,37 @@ from prometheus_client.core import GaugeMetricFamily
 
 #-------------------------------------------------------------------------------
 class TurretGauge(GaugeMetricFamily):
-    """ Basic Gauge. """
+    """Basic Gauge."""
     #---------------------------------------------------------------------------
     def __init__(self, name="", documentation="", label=""):
-        """ Initialization. """
+        """Initialization."""
         super().__init__(name, documentation, labels=[label])
 
     #---------------------------------------------------------------------------
     def createCollector(self, gaugeMetrics: List[Tuple[str, float]]):
-        """ Create a collector from the acquire step. """
+        """Create a collector from the acquire step."""
         for key, value in gaugeMetrics:
             self.add_metric([key], value)
 
 #-------------------------------------------------------------------------------
 class Turret(Collector):
-    """ Basic turret. """
+    """Basic turret."""
     #---------------------------------------------------------------------------
     def __init__(self):
-        """ Initialization. """
+        """Initialization."""
         self.gauges = {}  # str -> TurretGauge
         self.metrics = {} # str -> List[Tuple[str, float]]
 
     #---------------------------------------------------------------------------
     def acquire(self):
-        """ Overridable function which creates self.gauges and self.metrics. """
+        """Overridable function which creates self.gauges and self.metrics."""
 
         raise NotImplementedError
 
     #---------------------------------------------------------------------------
     def collect(self):
-        """ Basic Collector.collect method. Calls acquire to get gauges and
-            metrics, then creates and yields each gauge.
+        """Basic Collector.collect method. Calls acquire to get gauges and
+        metrics, then creates and yields each gauge.
         """
         self.acquire()
 

@@ -19,7 +19,7 @@ from prometheus_client.core import REGISTRY
 
 #-------------------------------------------------------------------------------
 def getLocalTurrets(turretsModulePath: str, blacklist: list) -> List:
-    """ Find all turrets in glados.
+    """Find all turrets in glados.
 
     Args:
         turretsModulePath: Path to module (directory) containing turret modules.
@@ -30,7 +30,7 @@ def getLocalTurrets(turretsModulePath: str, blacklist: list) -> List:
     """
 
     def isSpecializedTurret(turretStr: str) -> bool:
-        """ Whether or not a turret is specialized and not just "Turret". """
+        """Whether or not a turret is specialized and not just "Turret"."""
         return turretStr.endswith("Turret") and turretStr != "Turret"
 
     allTurrets = []
@@ -49,7 +49,7 @@ def getLocalTurrets(turretsModulePath: str, blacklist: list) -> List:
 
 #-------------------------------------------------------------------------------
 def turretServer(port: int):
-    """ Serve all turrets found.
+    """Serve all turrets found.
 
     Args:
         port: Port on which to serve.
@@ -64,7 +64,7 @@ def turretServer(port: int):
     turretsModulePath = op.join(op.dirname(__file__), "turrets")
     turretBlackList = ["JsonTurret"]
     for collector in getLocalTurrets(turretsModulePath, turretBlackList):
-        collectorStr = str(collector).rsplit('.', maxsplit=1)[-1]
+        collectorStr = str(collector).rsplit(".", maxsplit=1)[-1].split("'")[0]
         print(f"[I] Found turret {collectorStr}")
 
         REGISTRY.register(collector())
