@@ -18,7 +18,7 @@ class StorageUsageTurret(Turret):
         """ Initialization. """
         super().__init__()
         self.__dfInfo = ""
-        self.__excludeList = ["tmpfs"]
+        self.__excludeList = ["/tmpfs", "/snap"]
         self._readDfInfo()
 
     #---------------------------------------------------------------------------
