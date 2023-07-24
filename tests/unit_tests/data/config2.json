@@ -1,0 +1,6 @@
+{
+    "sleepTime": 5,
+    "FileTurrets": [
+        "./unit_tests/data/randomServer/NvidiaGpu.turret"
+    ]
+}

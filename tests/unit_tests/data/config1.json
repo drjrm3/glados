@@ -1,0 +1,6 @@
+{
+    "sleepTime": 5,
+    "JsonTurrets": [
+        "./unit_tests/data/goveeSensor.json"
+    ]
+}

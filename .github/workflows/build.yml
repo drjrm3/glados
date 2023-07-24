@@ -31,6 +31,7 @@ jobs:
         PYTHONPATH=$(pwd)/../src:$PYTHONPATH \
           coverage run -m unittest discover unit_tests -p "*test.py" -b
         coverage report -m > coverage.txt
+        ls -la
 
         cat coverage.txt
         COV_PCT=$(tail -n1 coverage.txt | awk '{print $NF}' | sed 's/%//')
@@ -40,4 +41,9 @@ jobs:
         else
           echo "PASS: Coverage $COV_PCT >= 80%"
         fi
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: tests
 

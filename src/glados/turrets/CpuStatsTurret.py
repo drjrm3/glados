@@ -17,25 +17,20 @@ class CpuStatsTurret(Turret):
     def __init__(self):
         """Initialization."""
         super().__init__()
-        self.__procCpuInfo = ""
-        self._readProcCpuInfo()
-
-    #---------------------------------------------------------------------------
-    def _readProcCpuInfo(self):
-        """Read /proc/cpuinfo."""
-        with open("/proc/cpuinfo", "r", encoding="UTF-8") as finp:
-            self.__procCpuInfo = finp.read()
+        self._fileName = "/proc/cpuinfo"
 
     #---------------------------------------------------------------------------
     def collect(self):
         """Run the collector."""
-        self._readProcCpuInfo()
+        self._readFileInfo()
         vCoreSpeeds = GMF(
-            "vcore_speeds", "Gauge of current vCPU speeds.", labels=["vcore"]
+            "vcore_speeds",
+            f"Gauge of current vCPU speeds for {self.hostname}",
+            labels=["host", "vcore"]
         )
         vCore = -1
         vCoreGHz = 0.0
-        for line in self.__procCpuInfo.splitlines():
+        for line in self._turretFileInfo.splitlines():
             words = line.split(":")
             key = words[0].strip()
             value = words[-1].strip()
@@ -44,6 +39,6 @@ class CpuStatsTurret(Turret):
             elif key == "cpu MHz":
                 vCoreGHz = float(value) / 1000.0
             if ":" not in line:
-                vCoreSpeeds.add_metric([f"{vCore}"], vCoreGHz)
+                vCoreSpeeds.add_metric([self.hostname, f"{vCore}"], vCoreGHz)
 
         yield vCoreSpeeds

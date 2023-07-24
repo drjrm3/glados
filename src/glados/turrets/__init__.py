@@ -4,3 +4,7 @@ Initializaton for turrets module.
 
 Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """
+
+import socket
+
+hostname = socket.gethostname()

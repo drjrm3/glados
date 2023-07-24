@@ -17,7 +17,7 @@ def main():
     args = getArgs()
 
     if action == "turret":
-        turretServer(args.port)
+        turretServer(args.port, args.config)
 
 #-------------------------------------------------------------------------------
 main()

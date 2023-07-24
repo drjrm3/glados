@@ -56,7 +56,7 @@ class TestCpuStatsTurret(ut.TestCase):
         for sample in next(turret.collect()).samples:
             sampleDebugger(sample)
             numCores += 1
-            self.assertEqual(sorted(sample.labels.keys()), ["vcore"])
+            self.assertEqual(sorted(sample.labels.keys()), ["host", "vcore"])
             speeds.append(float(sample.value))
             vcores.append(int(sample.labels['vcore']))
         print(speeds)
@@ -94,29 +94,22 @@ class TestStorageUsageTurret(ut.TestCase):
         turret = self.turretFactory()
 
         g = turret.collect()
-        pctMetric = next(g)
-        availMetric = next(g)
+        allMetrics = next(g)
 
         mnts = [] # Mounts.
         pcts = [] # Percentage disk utilization.
         avails = [] # GB availability.
 
-        # Test pctMetric.
-        for sample in pctMetric.samples:
-            sampleDebugger(sample)
-            self.assertEqual(sorted(sample.labels.keys()), ["mnt"])
+        for sample in allMetrics.samples:
             mnts.append(sample.labels["mnt"])
-            pcts.append(float(sample.value))
+            metric = sample.labels["metric"]
+            if metric == "usePct":
+                pcts.append(sample.value)
+            elif metric == "availGB":
+                avails.append(sample.value)
 
-        # Test availMetric.
-        for sample in availMetric.samples:
-            sampleDebugger(sample)
-            self.assertEqual(sorted(sample.labels.keys()), ["mnt"])
-            avails.append(float(sample.value))
+        mnts = list(set(mnts))
 
         self.assertTrue(all("/" in mnt for mnt in mnts))
         self.assertTrue(all(float(pct) < 100. for pct in pcts))
         self.assertTrue(all(float(avail) > 0. for avail in avails))
-        print(mnts)
-        print(pcts)
-        print(avails)

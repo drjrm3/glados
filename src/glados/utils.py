@@ -6,13 +6,41 @@ Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """
 
 import argparse
+import json
+from os.path import exists as ope
 import shlex
 import subprocess
 import sys
 
-from typing import Tuple
+from typing import Tuple, Dict
 
 from . import __version__
+
+#-------------------------------------------------------------------------------
+def getParamsFromConfig(configFile: str = "") -> Dict:
+    """Get config variables from config file
+
+    Args:
+        configFile: Path to input config file in Json format.
+
+    Returns:
+        configs: Dictionary of config options.
+    """
+
+    params = {
+        "sleepTime": 5,
+        "FileTurrets": [],
+        "JsonTurrets": [],
+    }
+
+    if isinstance(configFile, str) and ope(configFile):
+        with open(configFile, "r", encoding="UTF-8") as finp:
+            _params = json.loads(finp.read())
+            for _key in _params:
+                if _key in params:
+                    params[_key] = _params[_key]
+
+    return params
 
 #-------------------------------------------------------------------------------
 def getArgs(argv=None):
@@ -28,26 +56,12 @@ def getArgs(argv=None):
     # 'turret'
     # - Run the turret client to feed data to glados.
     turretP = subparser.add_parser("turret", help="Run the turret client.")
-    #turretP.add_argument("-c", "--config", type=str,
-    #                     help="Configuration file to use.")
+    turretP.add_argument("-c", "--config", type=str,
+                         help="Configuration file to use.")
     turretP.add_argument("-p", "--port", type=int, required=True,
                          help="Port to run on.")
     turretP.add_argument("-v", "--version", action='version',
                          version=f"turret {__version__}")
-
-    # 'serve'
-    # - Serve the glados website.
-    #serveP = subparser.add_parser("serve", help="Serve glados site.")
-    #serveP.add_argument("-i", --inputDataDir", type=str, required=True,
-    #                    help="Input directory with .rrd files for data.")
-    #serveP.add_argument("-p", --port", type=int, default=8081,
-    #                    help="Port to serve on.")
-
-    # 'rust'
-    # - Check on the status a turret / server / input file.
-    #rustP = subparser.add_parser("rust", help="R U Still There?")
-    #rustP = rustP.add_argument("-t", "--timeOut", type=int,
-    #                           help="Heartbeat threshold.")
 
     args = parser.parse_args(argv[1:])
 
