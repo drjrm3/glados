@@ -203,10 +203,10 @@ class NvidiaGpuTurret(Turret):
         nvInfo = self._readNvInfo()
 
         self.gauge = TurretGauge(
-                f"gpu_metrics_{self.hostname}",
-                "Multiple GPU metrics",
-                ["host", "device", "metric"]
-            )
+            f"gpu_metrics_{self.hostname}",
+            "Multiple GPU metrics",
+            ["host", "device", "metric"]
+        )
 
         for devId, device in nvInfo.devs.items():
             devName = f"device_{devId}"
