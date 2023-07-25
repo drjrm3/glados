@@ -18,8 +18,6 @@ from prometheus_client.core import REGISTRY
 from .utils import runCommand, getParamsFromConfig
 from .turrets.JsonTurret import JsonTurret
 
-# TODO: Implement logger.
-
 #-------------------------------------------------------------------------------
 def isSpecializedTurret(turretStr: str) -> bool:
     """Whether or not a turret is specialized and not just "Turret"."""

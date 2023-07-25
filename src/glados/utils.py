@@ -95,7 +95,7 @@ def getArgs(argv=None):
 
 #-------------------------------------------------------------------------------
 def runCommand(
-        cmdStr: str, shell=False, stdout=None, stderr=None
+    cmdStr: str, shell=False, stdout=None, stderr=None
 ) -> Tuple[str, str, int]:
     """Run a shell command from Python.
 
