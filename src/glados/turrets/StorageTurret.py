@@ -35,8 +35,9 @@ class StorageUsageTurret(Turret):
         """Acquire storage stats and call collector."""
         self._readDfInfo()
 
-        self.gauge = TurretGauge("storage_usage", "Mount usage pct.",
-                                 ["host", "mnt", "metric"])
+        self.gauge = TurretGauge(
+            "storage_usage", "Mount usage pct.", ["host", "mnt", "metric"]
+        )
 
         mnt = ""
         usePct = 0.0

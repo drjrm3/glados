@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """ Test file based turrets for glados. """
 
-import unittest as ut
+import math
 import os.path as op
-from os.path import exists as ope, dirname as opd, join as opj
-from glados import turrets
+from os.path import dirname as opd, join as opj
+import unittest as ut
+import sys
 
 from prometheus_client.metrics_core import GaugeMetricFamily
 
-import numpy as np
+from glados import turrets
+from glados.turrets.NvidiaGpuTurret import getNvChunks
 
 #-------------------------------------------------------------------------------
 def sampleDebugger(sample):
@@ -85,17 +87,26 @@ class TestNvidiaFileTurret(ut.TestCase):
         testDataDir = opj(opd(opd(op.realpath(__file__))), "data")
         self.testFileName = opj(testDataDir, self.hostname, "NvidiaGpu.turret")
         self.gsDict = {
-            ('randomServer', 'device_0', 'usage_pct'): 0,
-            ('randomServer', 'device_0', 'temperature'): 38,
-            ('randomServer', 'device_0', 'power'): 18,
-            ('randomServer', 'device_0', 'mem_use_mb'): 30,
-            ('randomServer', 'device_0', 'mem_max_mb'): 8193,
-            ('randomServer', 'device_1', 'usage_pct'): 5,
-            ('randomServer', 'device_1', 'temperature'): 35,
-            ('randomServer', 'device_1', 'power'): 20,
-            ('randomServer', 'device_1', 'mem_use_mb'): 32,
-            ('randomServer', 'device_1', 'mem_max_mb'): 8194
-        }
+            ('randomServer', 'device_0', 'usage_pct'): 0.0,
+            ('randomServer', 'device_0', 'temperature'): 38.0,
+            ('randomServer', 'device_0', 'power'): 18.0,
+            ('randomServer', 'device_0', 'mem_use_mb'): 30.0,
+            ('randomServer', 'device_0', 'mem_max_mb'): 8193.0,
+            ('randomServer', 'device_1', 'usage_pct'): 5.0,
+            ('randomServer', 'device_1', 'temperature'): 35.0,
+            ('randomServer', 'device_1', 'power'): 20.0,
+            ('randomServer', 'device_1', 'mem_use_mb'): 32.0,
+            ('randomServer', 'device_1', 'mem_max_mb'): 8194.0,
+            ('randomServer', 'device_2', 'usage_pct'): 7.0,
+            ('randomServer', 'device_2', 'temperature'): 35.0,
+            ('randomServer', 'device_2', 'power'): 24.0,
+            ('randomServer', 'device_2', 'mem_use_mb'): 124.0,
+            ('randomServer', 'device_2', 'mem_max_mb'): 8195.0,
+            ('randomServer', 'device_3', 'usage_pct'): math.nan,
+            ('randomServer', 'device_3', 'temperature'): math.nan,
+            ('randomServer', 'device_3', 'power'): math.nan,
+            ('randomServer', 'device_3', 'mem_use_mb'): 0.0,
+            ('randomServer', 'device_3', 'mem_max_mb'): 8194.0}
 
     #---------------------------------------------------------------------------
     # TODO: Move this into a more modular Turret tester to avoid reuse.
@@ -114,6 +125,32 @@ class TestNvidiaFileTurret(ut.TestCase):
         self.assertIsInstance(metric, GaugeMetricFamily)
 
     #---------------------------------------------------------------------------
+    def testGetNvChunks(self):
+        """ Test collection of the turret. """
+        gsChunks = [
+            ['|===============================+======================+======================|',
+             '|   0  NVIDIA GeForce ...  On   | 00000000:2A:00.0 Off |                  N/A |',
+             '|  0%   38C    P0    18W / 220W |     30MiB /  8193MiB |      0%      Default |',
+             '|                               |                      |                  N/A |'],
+             ['+-------------------------------+----------------------+----------------------+',
+             '|   1  NVIDIA GeForce ...  On   | 00000000:2B:00.0 Off |                  N/A |',
+             '|  1%   35C    P8    20W / 225W |     32MiB /  8194MiB |      5%      Default |',
+             '|                               |                      |                  N/A |'],
+             ['+-------------------------------+----------------------+----------------------+',
+             '|   2  NVIDIA X100          On  | 00000000:2C:00.0 Off |                  N/A |',
+             '| N/A   35C    P0     24W / 230W|    124MiB /  8195MiB |      7%      Default |',
+             '|                               |                      |                  N/A |'],
+             ['+-------------------------------+----------------------+----------------------+',
+             '|   3  NVIDIA Y100          On  | 00000000:2B:00.0 Off |                 ERR! |',
+             '|ERR!  ERR! ERR!     ERR! / ERR!|      0MiB /  8194MiB |    ERR!      Default |',
+             '|                               |                      |                 ERR! |']
+        ]
+        with open(self.testFileName, "r") as finp:
+            lines = finp.read().splitlines()
+            chunks = getNvChunks(lines)
+        self.assertEqual(chunks, gsChunks)
+
+    #---------------------------------------------------------------------------
     def testCollectionSpecifics(self):
         """ Test collection of the turret. """
         turret = self.turretFactory(self.testFileName, self.hostname)
@@ -124,6 +161,15 @@ class TestNvidiaFileTurret(ut.TestCase):
         for sample in allMetrics.samples:
             key = tuple(v for _, v in sample.labels.items())
             atDict[key] = sample.value
+
+        print("AT:")
+        for k, v in atDict.items():
+            print(k, v)
+        print("GS:")
+        for k, v in self.gsDict.items():
+            print(k, v)
+
+        print(atDict)
 
         self.assertDictEqual(self.gsDict, atDict)
 

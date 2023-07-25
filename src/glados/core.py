@@ -127,6 +127,9 @@ def turretServer(port: int, configFile=""):
     """
     assert isinstance(port, int), "!isinstance(port, int)"
 
+    def turretStr(tur):
+        return str(tur).rsplit(".", maxsplit=1)[-1].split(" ")[0]
+
     params = getParamsFromConfig(configFile)
 
     # Make and start the app.
@@ -137,18 +140,15 @@ def turretServer(port: int, configFile=""):
     turretsModulePath = op.join(op.dirname(__file__), "turrets")
     turretExcludeList = getTurretExcludeList()
     for turret in getDefaultTurrets(turretsModulePath, turretExcludeList):
-        turretStr = str(turret).rsplit(".", maxsplit=1)[-1].split("'")[0]
-        print(f"[I] Found turret {turretStr}")
-
-        print(f"Registering turret {turret}.")
+        print(f"[I] Found turret {turretStr(turret)}.")
         REGISTRY.register(turret)
 
     for turret in getJsonTurrets(params["JsonTurrets"]):
-        print(f"Registering turret {turret}.")
+        print(f"[I] Found turret {turretStr(turret)}:\n    {turret._fileName}")
         REGISTRY.register(turret)
 
     for turret in getFileTurrets(params["FileTurrets"]):
-        print(f"Registering turret {turret}.")
+        print(f"[I] Found turret {turretStr(turret)}:\n    {turret._fileName}")
         REGISTRY.register(turret)
 
     # Sleep between each collection.

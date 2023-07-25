@@ -18,7 +18,9 @@ class TurretGauge(GaugeMetricFamily):
     """Basic Gauge."""
     #---------------------------------------------------------------------------
     # TODO: Add timestamp.
-    def __init__(self, name="", documentation="", labels: Optional[List]=None):
+    def __init__(
+        self, name="", documentation="", labels: Optional[List] = None
+    ):
         """Initialization."""
         if not isinstance(labels, List):
             labels = [""]
@@ -28,17 +30,18 @@ class TurretGauge(GaugeMetricFamily):
 class Turret(Collector):
     """Basic turret."""
     #---------------------------------------------------------------------------
-    def __init__(self, file: str="", hostname: str=""):
+    def __init__(self, file: str = "", hostname: str = ""):
         """Initialization."""
         self.gauge: GaugeMetricFamily
         self.metrics: Dict[str, List[Tuple[List[str], float]]] = {}
         self.hostname = hostname if hostname else hostnameActual
 
-        self._fileName=file
-        self._turretFileInfo=""
+        # TODO: Add getter / setter method around this self._fileName.
+        self._fileName = op.realpath(file) if op.exists(file) else file
+        self._turretFileInfo = ""
 
         if self._fileName and not op.exists(self._fileName):
-            raise FileNotFoundError(self._turretFileInfo)
+            raise FileNotFoundError(self._fileName)
 
     #---------------------------------------------------------------------------
     def _readFileInfo(self):

@@ -26,7 +26,7 @@ class CpuStatsTurret(Turret):
         vCoreSpeeds = GMF(
             "vcore_speeds",
             f"Gauge of current vCPU speeds for {self.hostname}",
-            labels=["host", "vcore"]
+            labels=["host", "vcore"],
         )
         vCore = -1
         vCoreGHz = 0.0

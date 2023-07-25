@@ -1,11 +1,26 @@
 #!/usr/bin/env python3
 """ Test basic utilities for glados. """
 
-import glob
+import math
 import os.path as op
 import unittest as ut
 
 from glados import utils
+
+#-------------------------------------------------------------------------------
+class TestStrToFloat(ut.TestCase):
+    """Test invocations of strToFloat."""
+    #---------------------------------------------------------------------------
+    def testGoodStrs(self):
+        """Test good examples of conversion."""
+        kvs = {"1.5": 1.5, "1": 1.0, "five": math.nan}
+
+        for gsKey, gsValue in kvs.items():
+            atValue = utils.strToFloat(gsKey)
+            if math.isnan(gsValue):
+                self.assertTrue(math.isnan(atValue))
+            else:
+                self.assertEqual(gsValue, atValue)
 
 #-------------------------------------------------------------------------------
 class TestGetParamsFromConfig(ut.TestCase):

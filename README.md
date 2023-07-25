@@ -1,4 +1,5 @@
 [![build](https://github.com/drjrm3/glados/actions/workflows/build.yml/badge.svg)](https://github.com/drjrm3/glados/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/drjrm3/glados/branch/master/graph/badge.svg?token=XU0C1QE1J2)](https://codecov.io/gh/drjrm3/glados)
 
 # GLADOS
 Glados (**G**eneric **L**oad **A**u**d**iting **o**f **S**ervers) is a wrapper for [Prometheus](https://prometheus.io) allowing simple python functions to be fed into [Prometheus](https://prometheus.io) / [Grafana](https://grafana.com).

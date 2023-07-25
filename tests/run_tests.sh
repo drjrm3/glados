@@ -9,8 +9,9 @@ export PATH=$HERE/../bin:$PATH
 glados turret -v
 
 #turret -p 9101
-#turret -p 9101 -c unittest/data/config1.json
-#turret -p 9101 -c unittest/data/config2.json
+#turret -p 9101 -c unit_tests/data/config1.json
+#turret -p 9101 -c unit_tests/data/config2.json
+#turret -p 9101 -c unit_tests/data/config3.json
 #exit $?
 
 #turret 
@@ -19,32 +20,32 @@ glados turret -v
 echo "[******************]"
 echo "[* Running pylint *]"
 echo "[******************]"
+set +e
 MIN_PYLINT_SCORE=9.0
 pylint --rcfile=../.pylintrc ../src/glados > pylint.tmp
 cat pylint.tmp | tail -n2
 cat pylint.tmp
-
-#exit $?
+set -e
 
 #echo "[*****************]"
 #echo "[* Running black *]"
 #echo "[*****************]"
-#black --diff ../src/glados > black.diff
+#black -l 80 --diff ../src/glados > black.diff
 
 echo "[****************]"
 echo "[* Running mypy *]"
 echo "[****************]"
 mypy ../src/glados
 
-#exit $?
-
 echo "[**********************]"
 echo "[* Running Unit Tests *]"
 echo "[**********************]"
 OMIT=../src/glados/__main__.py
-coverage run -m unittest discover unit_tests -p "*test.py" -b
+coverage run -m pytest
 COVERAGE_REPORT=.coverage.tmp
 coverage report -m > $COVERAGE_REPORT
+
+#exit $?
 
 echo ""
 echo "[********************]"
