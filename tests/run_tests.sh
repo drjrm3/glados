@@ -27,10 +27,10 @@ cat pylint.tmp | tail -n2
 cat pylint.tmp
 set -e
 
-#echo "[*****************]"
-#echo "[* Running black *]"
-#echo "[*****************]"
-#black -l 80 --diff ../src/glados > black.diff
+echo "[*****************]"
+echo "[* Running black *]"
+echo "[*****************]"
+black -l 80 --diff ../src/glados > black.diff 2> /dev/null
 
 echo "[****************]"
 echo "[* Running mypy *]"

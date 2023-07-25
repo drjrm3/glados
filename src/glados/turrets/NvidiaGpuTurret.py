@@ -37,6 +37,7 @@ def rmStrDups(line: str) -> str:
 @dataclass
 class Device:
     """Data class for keeping Nvidia device information."""
+
     # TODO: Keep track of processes on this device.
 
     #---------------------------------------------------------------------------
@@ -47,8 +48,16 @@ class Device:
         |                               |                      |                  N/A |
         """
         self.__sections = [""]
-        keys = ["id", "fanSpeed", "temp", "pwr", "pwrMax", "memUse", "memMax",
-                "usage"]
+        keys = [
+            "id",
+            "fanSpeed",
+            "temp",
+            "pwr",
+            "pwrMax",
+            "memUse",
+            "memMax",
+            "usage",
+        ]
         for key in keys:
             setattr(self, key, math.nan)
         for key in ["perf", "busId"]:
@@ -63,8 +72,16 @@ class Device:
     def __str__(self) -> str:
         """String repr."""
         outStr = "\n"
-        for key in ["id", "fanSpeed", "temp", "pwr", "pwrMax", "memUse",
-                    "memMax", "usage"]:
+        for key in [
+            "id",
+            "fanSpeed",
+            "temp",
+            "pwr",
+            "pwrMax",
+            "memUse",
+            "memMax",
+            "usage",
+        ]:
             outStr += f"{key} = {getattr(self, key)}\n"
         return outStr
 
@@ -191,7 +208,7 @@ class NvidiaGpuTurret(Turret):
         if self._fileName:
             self._readFileInfo()
         else:
-            outStr, _errStr, returnCode = runCommand("nvidia-smi")
+            outStr, _, returnCode = runCommand("nvidia-smi")
             assert returnCode == 0
             self._turretFileInfo = outStr
 
@@ -203,10 +220,10 @@ class NvidiaGpuTurret(Turret):
         nvInfo = self._readNvInfo()
 
         self.gauge = TurretGauge(
-                f"gpu_metrics_{self.hostname}",
-                "Multiple GPU metrics",
-                ["host", "device", "metric"]
-            )
+            f"gpu_metrics_{self.hostname}",
+            "Multiple GPU metrics",
+            ["host", "device", "metric"]
+        )
 
         for devId, device in nvInfo.devs.items():
             devName = f"device_{devId}"

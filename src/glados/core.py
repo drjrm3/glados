@@ -18,8 +18,6 @@ from prometheus_client.core import REGISTRY
 from .utils import runCommand, getParamsFromConfig
 from .turrets.JsonTurret import JsonTurret
 
-# TODO: Implement logger.
-
 #-------------------------------------------------------------------------------
 def isSpecializedTurret(turretStr: str) -> bool:
     """Whether or not a turret is specialized and not just "Turret"."""
@@ -144,11 +142,11 @@ def turretServer(port: int, configFile=""):
         REGISTRY.register(turret)
 
     for turret in getJsonTurrets(params["JsonTurrets"]):
-        print(f"[I] Found turret {turretStr(turret)}:\n    {turret._fileName}")
+        print(f"[I] Found turret {turretStr(turret)}:\n    {turret.fileName}")
         REGISTRY.register(turret)
 
     for turret in getFileTurrets(params["FileTurrets"]):
-        print(f"[I] Found turret {turretStr(turret)}:\n    {turret._fileName}")
+        print(f"[I] Found turret {turretStr(turret)}:\n    {turret.fileName}")
         REGISTRY.register(turret)
 
     # Sleep between each collection.

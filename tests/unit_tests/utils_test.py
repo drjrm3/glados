@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Test basic utilities for glados. """
+"""Test basic utilities for glados."""
 
 import math
 import os.path as op
@@ -24,7 +24,7 @@ class TestStrToFloat(ut.TestCase):
 
 #-------------------------------------------------------------------------------
 class TestGetParamsFromConfig(ut.TestCase):
-    """ Test invocations of TestGetParamsFromConfig function. """
+    """Test invocations of TestGetParamsFromConfig function."""
     #---------------------------------------------------------------------------
     def setUp(self):
         self.testDataDir = op.join(op.dirname(op.realpath(__file__)), "data")
@@ -48,10 +48,10 @@ class TestGetParamsFromConfig(ut.TestCase):
 
 #-------------------------------------------------------------------------------
 class TestRunCommand(ut.TestCase):
-    """ Test invocations of runCommand function. """
+    """Test invocations of runCommand function."""
     #---------------------------------------------------------------------------
     def testCommandNotFound(self):
-        """ Assert that runCommand fails on command not found. """
+        """Assert that runCommand fails on command not found."""
         outStr, errStr, rCode = utils.runCommand("foo")
         self.assertEqual(outStr, "")
         self.assertEqual(errStr, "Command foo not found")
@@ -60,12 +60,12 @@ class TestRunCommand(ut.TestCase):
     #---------------------------------------------------------------------------
     @ut.expectedFailure
     def testCommandNotStr(self):
-        """ Assert failure on calling runCommand with integer. """
+        """Assert failure on calling runCommand with integer."""
         utils.runCommand(1)
 
     #---------------------------------------------------------------------------
     def testGoodCommand(self):
-        """ Test a good call to runCommand. """
+        """Test a good call to runCommand."""
         outStr, errStr, rCode = utils.runCommand("echo hello world")
         self.assertEqual(outStr, "hello world\n")
         self.assertEqual(errStr, "")
@@ -73,7 +73,7 @@ class TestRunCommand(ut.TestCase):
 
     #---------------------------------------------------------------------------
     def testShellInjection(self):
-        """ Ensure runCommmand is RCE proof. """
+        """Ensure runCommmand is RCE proof."""
         outStr, errStr, rCode = utils.runCommand("echo foo; touch RCEfailure")
         self.assertEqual(outStr, "foo; touch RCEfailure\n")
         self.assertEqual(errStr, "")

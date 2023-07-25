@@ -72,7 +72,7 @@ def getArgs(argv=None):
 
     parser = argparse.ArgumentParser(prog="glados")
     parser.add_argument(
-        "-v", "--version", action='version', version=f"glados {__version__}"
+        "-v", "--version", action="version", version=f"glados {__version__}"
     )
     subparser = parser.add_subparsers(help="Actions.")
 
@@ -86,7 +86,7 @@ def getArgs(argv=None):
         "-p", "--port", type=int, required=True, help="Port to run on."
     )
     turretP.add_argument(
-        "-v", "--version", action='version', version=f"turret {__version__}"
+        "-v", "--version", action="version", version=f"turret {__version__}"
     )
 
     args = parser.parse_args(argv[1:])
@@ -95,7 +95,7 @@ def getArgs(argv=None):
 
 #-------------------------------------------------------------------------------
 def runCommand(
-        cmdStr: str, shell=False, stdout=None, stderr=None
+    cmdStr: str, shell=False, stdout=None, stderr=None
 ) -> Tuple[str, str, int]:
     """Run a shell command from Python.
 

@@ -36,18 +36,14 @@ class Turret(Collector):
         self.metrics: Dict[str, List[Tuple[List[str], float]]] = {}
         self.hostname = hostname if hostname else hostnameActual
 
-        # TODO: Add getter / setter method around this self._fileName.
-        self._fileName = op.realpath(file) if op.exists(file) else file
-        self._turretFileInfo = ""
-
-        if self._fileName and not op.exists(self._fileName):
-            raise FileNotFoundError(self._fileName)
+        self.fileName = file
+        self.turretFileInfo = ""
 
     #---------------------------------------------------------------------------
     def _readFileInfo(self):
         """If the Turret was given a file to read then process the file."""
-        with open(self._fileName, "r", encoding="UTF-8") as finp:
-            self._turretFileInfo = finp.read()
+        with open(self.fileName, "r", encoding="UTF-8") as finp:
+            self.turretFileInfo = finp.read()
 
     #---------------------------------------------------------------------------
     def addMetric(self, labels: List[str], value: float) -> None:
@@ -70,9 +66,33 @@ class Turret(Collector):
         """Basic Collector.collect method. Calls acquire to get gauges and
         metrics, then creates and yields each gauge.
         """
-        if self._fileName:
+        if self.fileName:
             self._readFileInfo()
 
         self.acquire()
 
         yield self.gauge
+
+    #---------------------------------------------------------------------------
+    @property
+    def fileName(self) -> str:
+        """Return the underlying filename assigned."""
+        return self._fileName
+
+    @fileName.setter
+    def fileName(self, file: str) -> None:
+        """Set the underlying filename."""
+        self._fileName = op.realpath(file) if op.exists(file) else file
+        if self._fileName and not op.exists(self._fileName):
+            raise FileNotFoundError(self._fileName)
+
+    #---------------------------------------------------------------------------
+    @property
+    def turretFileInfo(self) -> str:
+        """Return the underlying file information."""
+        return self._turretFileInfo
+
+    @turretFileInfo.setter
+    def turretFileInfo(self, turretFileInfo: str) -> None:
+        """Set the underlying file information."""
+        self._turretFileInfo = turretFileInfo
