@@ -13,29 +13,29 @@ from .Turret import Turret, TurretGauge
 class JsonTurret(Turret):
     """Collect CPU statistics."""
     #---------------------------------------------------------------------------
-    def __init__(self, jsonFile: str):
+    def __init__(self, jsonFile: str, hostname=""):
         """Initialization.
 
         Args:
             jsonFile: Path to a json file to read for information.
         """
-        super().__init__()
-        self._fileName = jsonFile
+        super().__init__(jsonFile, hostname)
+
         self._parseJson()
 
     #---------------------------------------------------------------------------
-    def _parseJson(self):
+    def _parseJson(self) -> None:
         """Parse the JSON file."""
         self._readFileInfo()
         self.data = json.loads(self._turretFileInfo)
         # TODO: Add timestamp once TurretGauge supports it.
-        self.gauge = TurretGauge(self.data["name"], self.data["description"],
-                                 self.data["labels"])
+        self.gauge = TurretGauge(
+            self.data["name"], self.data["description"], self.data["labels"]
+        )
 
     #---------------------------------------------------------------------------
     def acquire(self) -> None:
-        """Acquire the data. File format / naming convention here.
-        """
+        """Acquire the data. File format / naming convention here."""
         self._parseJson()
 
         for labels, value in self.data["metrics"]:

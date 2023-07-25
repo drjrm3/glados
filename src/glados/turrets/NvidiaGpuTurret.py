@@ -7,15 +7,35 @@ Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 """
 
 from dataclasses import dataclass
-from typing import List
+import math
+from typing import Dict, List
 
-from ..utils import runCommand
+from ..utils import runCommand, strToFloat
 from .Turret import Turret
 from .Turret import TurretGauge
 
 #-------------------------------------------------------------------------------
+def rmStrDups(line: str) -> str:
+    """Remove contiguous duplicates in a string.
+
+    Args:
+        line: Any string input.
+
+    Returns:
+        outStr: line with contiguous duplicates removed.
+    """
+
+    outStr = ""
+    for char in line:
+        if outStr and char == outStr[-1]:
+            continue
+        outStr = outStr + char
+
+    return outStr
+
+#-------------------------------------------------------------------------------
 @dataclass
-class Device():
+class Device:
     """Data class for keeping Nvidia device information."""
     # TODO: Keep track of processes on this device.
 
@@ -30,18 +50,14 @@ class Device():
         keys = ["id", "fanSpeed", "temp", "pwr", "pwrMax", "memUse", "memMax",
                 "usage"]
         for key in keys:
-            setattr(self, key, -1)
+            setattr(self, key, math.nan)
         for key in ["perf", "busId"]:
             setattr(self, key, "")
 
-        if not len(nvSmiChunk) == 4:
-            print("[W] Passing on following NvSmiChunk:\n")
-            for _line in nvSmiChunk:
-                print(_line)
-        else:
-            self._processLine1(nvSmiChunk[1])
-            self._processLine2(nvSmiChunk[2])
-            # Don't do anything with line 3.
+        assert len(nvSmiChunk) == 4, "[E] len(nvSmiChunk) != 4"
+        self._processLine1(nvSmiChunk[1])
+        self._processLine2(nvSmiChunk[2])
+        # Don't do anything with line 3.
 
     #---------------------------------------------------------------------------
     def __str__(self) -> str:
@@ -83,20 +99,55 @@ class Device():
         self.__sections = line.split("|")
 
         # First section.
-        self.fanSpeed = int(self._getValue(1, 0, "%"))
-        self.temp = int(self._getValue(1, 1, "C"))
+        self.fanSpeed = strToFloat(self._getValue(1, 0, "%"))
+        self.temp = strToFloat(self._getValue(1, 1, "C"))
         self.perf = self._getValue(1, 2)
-        self.pwr = int(self._getValue(1, 3, "W"))
-        self.pwrMax = int(self._getValue(1, 5, "W"))
+        self.pwr = strToFloat(self._getValue(1, 3, "W"))
+        self.pwrMax = strToFloat(self._getValue(1, 5, "W"))
 
         # Second section.
-        self.memUse = int(self._getValue(2, 0, "MiB"))
-        self.memMax = int(self._getValue(2, 2, "MiB"))
-        self.usage = int(self._getValue(3, 0, "%"))
+        self.memUse = strToFloat(self._getValue(2, 0, "MiB"))
+        self.memMax = strToFloat(self._getValue(2, 2, "MiB"))
+        self.usage = strToFloat(self._getValue(3, 0, "%"))
 
 #-------------------------------------------------------------------------------
-class NvInfo():
-    """Nvidia Information class based on 'nvidia-smi' output. """
+def getNvChunks(nvSmiLines: List[str]) -> List[List[str]]:
+    """Get chunks of nvidia-smi output for each device.
+
+    Args:
+        nvSmiLines: Output of nvidia-smi.
+
+    Returns:
+        chunks: chunks of 4 line lists, each defining a 'device' in nvidia-smi.
+    """
+    # Trim off everything before "|===" where each device information starts.
+    startPos = min(i for i, _line in enumerate(nvSmiLines) if "|===" in _line)
+    nvSmiLines = nvSmiLines[startPos:]
+
+    # Get the indices of all cutoff points between devices.
+    idxs = []
+    for idx, line in enumerate(nvSmiLines):
+        if rmStrDups(line) in ["+-+-+-+", "|=+=+=|"]:
+            idxs.append(idx)
+    idxs.append(len(nvSmiLines))
+
+    # Loop through indices and get device chunks.
+    chunks = []
+    for i in range(len(idxs) - 1):
+        idx1 = idxs[i]
+        idx2 = idxs[i + 1]
+        if idx2 - idx1 != 4:
+            continue
+        chunk = []
+        for line in nvSmiLines[idx1:idx2]:
+            chunk.append(line)
+        chunks.append(chunk)
+
+    return chunks
+
+#-------------------------------------------------------------------------------
+class NvInfo:
+    """Nvidia Information class based on 'nvidia-smi' output."""
     #---------------------------------------------------------------------------
     def __init__(self, nvSmiOut: str):
         """Initialize NvInfo data from nvidia-smi output.
@@ -107,25 +158,21 @@ class NvInfo():
         self.date = ""
         self.driverVersion = ""
         self.cudaVersion = ""
-        self.nGpus = -1
-        self.devs = {}
+        self.nGpus = math.nan
+        self.devs: Dict[int, Device] = {}
 
-        nvSmiLines = nvSmiOut.split("\n   ")[0].splitlines()
-
-        self.date = nvSmiLines.pop(0).strip()
-        self._handleHeader(nvSmiLines.pop(1))
-        nvSmiLines.pop(-1)
-
-        idx = min(i for i, _line in enumerate(nvSmiLines) if "|===" in _line)
-        nvSmiLines = nvSmiLines[idx:]
-        for i in range(0, len(nvSmiLines), 4):
-            chunk = nvSmiLines[i: i + 4]
+        nvSmiLines = nvSmiOut.splitlines()
+        chunks = getNvChunks(nvSmiLines)
+        for chunk in chunks:
             dev = Device(chunk)
             self.devs[dev.id] = dev
 
+        self.date = nvSmiLines.pop(0).strip()
+        self._handleHeader(nvSmiLines.pop(1))
+
     #---------------------------------------------------------------------------
     def _handleHeader(self, hLine: str):
-        """ Process the header line. """
+        """Process the header line."""
         self.driverVerion = hLine.split("Driver Version:")[0].split()[0].strip()
         self.cudaVerion = hLine.split("CUDA Version:")[0].split()[0].strip()
 
@@ -137,7 +184,6 @@ class NvidiaGpuTurret(Turret):
         """Initialization."""
         super().__init__(file, hostname)
         self._turretFileInfo = ""
-        self.nvInfo = self._readNvInfo()
 
     #---------------------------------------------------------------------------
     def _readNvInfo(self) -> NvInfo:
@@ -157,7 +203,8 @@ class NvidiaGpuTurret(Turret):
         nvInfo = self._readNvInfo()
 
         self.gauge = TurretGauge(
-                f"gpu_metrics_{self.hostname}", "Multiple GPU metrics",
+                f"gpu_metrics_{self.hostname}",
+                "Multiple GPU metrics",
                 ["host", "device", "metric"]
             )
 

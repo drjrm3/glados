@@ -7,6 +7,7 @@ Copyright © 2023, J. Robert Michael, PhD. All rights reserved.
 
 import argparse
 import json
+import math
 from os.path import exists as ope
 import shlex
 import subprocess
@@ -39,8 +40,29 @@ def getParamsFromConfig(configFile: str = "") -> Dict:
             for _key in _params:
                 if _key in params:
                     params[_key] = _params[_key]
+    elif not isinstance(configFile, str):
+        print(f"[W] Input config '{configFile}' is not a str.")
+    elif not ope(configFile):
+        print(f"[W] Input config '{configFile}' not found.")
 
     return params
+
+#-------------------------------------------------------------------------------
+def strToFloat(floatStr: str) -> float:
+    """Try to convert a string to float, otherwise convert it to nan.
+
+    Args:
+        floatStr: String representing float.
+
+    Returns:
+        floatVal: Float representation of floatStr, else math.nan.
+    """
+
+    try:
+        floatVal = float(floatStr)
+    except ValueError:
+        floatVal = math.nan
+    return floatVal
 
 #-------------------------------------------------------------------------------
 def getArgs(argv=None):
@@ -49,26 +71,32 @@ def getArgs(argv=None):
         argv = sys.argv
 
     parser = argparse.ArgumentParser(prog="glados")
-    parser.add_argument("-v", "--version", action='version',
-                        version=f"glados {__version__}")
+    parser.add_argument(
+        "-v", "--version", action='version', version=f"glados {__version__}"
+    )
     subparser = parser.add_subparsers(help="Actions.")
 
     # 'turret'
     # - Run the turret client to feed data to glados.
     turretP = subparser.add_parser("turret", help="Run the turret client.")
-    turretP.add_argument("-c", "--config", type=str,
-                         help="Configuration file to use.")
-    turretP.add_argument("-p", "--port", type=int, required=True,
-                         help="Port to run on.")
-    turretP.add_argument("-v", "--version", action='version',
-                         version=f"turret {__version__}")
+    turretP.add_argument(
+        "-c", "--config", type=str, help="Configuration file to use."
+    )
+    turretP.add_argument(
+        "-p", "--port", type=int, required=True, help="Port to run on."
+    )
+    turretP.add_argument(
+        "-v", "--version", action='version', version=f"turret {__version__}"
+    )
 
     args = parser.parse_args(argv[1:])
 
     return args
 
 #-------------------------------------------------------------------------------
-def runCommand(cmdStr: str, shell=False, stdout=None, stderr=None) -> Tuple[str, str, int]:
+def runCommand(
+        cmdStr: str, shell=False, stdout=None, stderr=None
+) -> Tuple[str, str, int]:
     """Run a shell command from Python.
 
     Args:
@@ -93,8 +121,9 @@ def runCommand(cmdStr: str, shell=False, stdout=None, stderr=None) -> Tuple[str,
     cmd = cmdStr if shell else shlex.split(cmdStr)
 
     try:
-        proc = subprocess.run(cmd, stdout=stdout, stderr=stderr,
-                              shell=shell, check=False)
+        proc = subprocess.run(
+            cmd, stdout=stdout, stderr=stderr, shell=shell, check=False
+        )
     except FileNotFoundError:
         stdout = ""
         stderr = f"Command {cmd[0]} not found"
